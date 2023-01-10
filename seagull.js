@@ -1,7 +1,11 @@
 
+const PADDING = 100
 const SEAGULL_SIZE = 10
 const FLIGHT_DURATION = 3000
 const STABLE_FLIGHT = 0.5
+
+let flockSize = 50
+let drawControlPoints = false
 
 function smooth_spline(p1, p4, duration, initialV1) {
   let v = new Vector(p1, p4).scaled(0.1)
@@ -18,7 +22,7 @@ function random_target(current) {
   let target = null
   while (true) {
     let side = Math.floor(rand(1, 4.999))
-    let min_x = 25
+    let min_x = PADDING
     let max_x = window.innerWidth - min_x
     let min_y = min_x
     let max_y = window.innerHeight - min_y
@@ -39,12 +43,20 @@ function randomize_point(p, amplitude) {
 
 class Seagull {
 
-  constructor(p, hue, spline) {
+  constructor(p, destination, hue) {
     this.p = p
     this.hue = hue
-    this.spline = spline
     this.prevp = null
     this.size = rand(SEAGULL_SIZE*.5, SEAGULL_SIZE*1.5)
+    this.update(destination)
+  }
+
+  flight_position() {
+    return this.spline?.localTime()
+  }
+
+  at_destination() {
+    return this.spline == null || this.spline.ended()
   }
 
   tick() {
@@ -66,18 +78,20 @@ class Seagull {
     if (this.spline) {
       let v1 = new Vector(this.spline.p3, this.spline.p4)
       if (this.v) {
-        v = this.v.normalized().scaled(v1.norm())
+        v = this.v.normalized().scaled(v1.norm()*2)
        } else {
         v = v1
        }
     }
     this.spline = smooth_spline(this.p, target, rand(duration*.9, duration*1.1), v)
-    this.v = new Vector(this.spline.p1, this.spline.p2)
+    this.v = this.v || new Vector(this.spline.p1, this.spline.p2)
   }
 
-  draw(ctx) {
+  draw(ctx, drawControlPoints) {
 
-    //this.spline?.draw(ctx, 'white')
+    if (drawControlPoints) {
+      this.spline?.draw(ctx, 'white')
+    }
     
     let color = `hsl(${this.hue}, 70%, 50%)`
 
@@ -106,9 +120,8 @@ function seagull() {
   let seagulls = []
   let initial = random_target()
   let target = random_target(initial)
-  for (let i=0; i<50; i++) {
-    let s = new Seagull(randomize_point(initial), rand(0, 360))
-    s.update(randomize_point(target))
+  for (let i=0; i<flockSize; i++) {
+    let s = new Seagull(randomize_point(initial), randomize_point(target), rand(0, 360))
     seagulls.push(s)
   }
 
@@ -116,7 +129,7 @@ function seagull() {
 
     onmousemove: function(e) {
 
-      if (seagulls[0].spline.localTime() > STABLE_FLIGHT) {
+      if (seagulls[0].flight_position() > STABLE_FLIGHT) {
         target = new Point(e.clientX, e.clientY)
         for (let s of seagulls) {
           s.update(randomize_point(target))
@@ -125,17 +138,48 @@ function seagull() {
 
     },
 
+    controls: [
+      {
+        type: 'select',
+        label: 'Flock size',
+        options: {
+          '1': 1,
+          '25': 25,
+          '50': 50,
+          '100': 100
+        },
+        selected: flockSize,
+        callback: (c) => {
+          if (seagulls.length > c) {
+            seagulls = seagulls.slice(0, c)
+          } else {
+            for (let i=seagulls.length; i<c; i++) {
+              let p = new Point(rand(0, window.innerWidth), rand(0, window.innerHeight))
+              let s = new Seagull(p, randomize_point(target), rand(0, 360))
+              seagulls.push(s)
+            }
+          }
+        }
+      },
+      {
+        type: 'checkbox',
+        label: 'Draw control points',
+        value: drawControlPoints,
+        callback: (v) => drawControlPoints = v
+      }
+    ],
+
     draw: function(ctx, time) {
       
       for (let s of seagulls) {
-        s.draw(ctx)
+        s.draw(ctx, drawControlPoints)
         s.tick()
       }
 
-      if (seagulls.find((s) => s.spline.ended())) {
-        let target = random_target(seagulls[0].p)
+      if (seagulls.find((s) => s.at_destination())) {
+        target = random_target(target)
         for (let s of seagulls) {
-          s.update(target.movedby(new Vector(rand(-50, 50), rand(-50, 40))))
+          s.update(randomize_point(target))
         }
       }
     }
