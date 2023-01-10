@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <title>2D Canvas experiment</title>
+    <style>
+      * { padding: 0; margin: 0; }
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #controls {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-family: sans-serif;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid white;
+        padding: 8px;
+      }
+      #controls > div {
+        margin-top: 4px;
+        margin-bottom: 4px;
+      }
+      #controls hr {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+      #controls label {
+        display: inline-block;
+        text-align: right;
+        margin-right: 8px;
+        width: 200px;
+      }
+      #controls button {
+        padding: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="controls">
+      <div>
+        <label for="quiet">Calculate but do not draw</label>
+        <input type="checkbox" name="quiet"/>
+      </div>
+      <hr/>
+      <div>
+        <label for="scene">Scene</label>
+        <select name="scene">
+          <option value="particles">Particles</option>
+        </select>
+      </div>
+    </div>
+    <script src="main.js"></script>
+    <script src="geom.js"></script>
+    <script src="drawing.js"></script>
+    <script src="particles.js"></script>
+  </body>
+</html>
