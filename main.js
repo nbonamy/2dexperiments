@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // select default scene
   if (window.localStorage.scene != null) {
-    //scene_select.value = window.localStorage.scene
+    scene_select.value = window.localStorage.scene
   }
   change_scene(scene_select.value)
   

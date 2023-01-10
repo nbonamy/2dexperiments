@@ -25,9 +25,13 @@ class Point {
   distance(other) {
     return new Vector(this, other).norm()
   }
+
+  is(other) {
+    return Math.abs(this.x - other.x) < 1e-9 && Math.abs(this.y - other.y) < 1e9
+  }
   
   set(other) {
-    if (other.x != this.x || other.y != this.y) {
+    if (this.is(other) == false) {
       this.x = other.x
       this.y = other.y
       return true
