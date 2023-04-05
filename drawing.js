@@ -41,11 +41,17 @@ function drawText(ctx, text, x, y, options) {
 function drawRect(ctx, p, options) {
   if (ctx.disabled) return
   options = {
-    ...{ color: 'white', size: 3 },
+    ...{ color: 'white', size: 3, width: 1, filled: true },
     ...options
   }
+  ctx.strokeStyle = options.color
   ctx.fillStyle = options.color
-  ctx.fillRect(p.x-options.size, p.y-options.size, 2*options.size+1, 2*options.size+1)
+  ctx.lineWidth = options.width
+  if (options.filled) {
+    ctx.fillRect(p.x, p.y, options.size, options.size)
+  } else {
+    ctx.strokeRect(p.x, p.y, options.size, options.size)
+  }
 
 }
 
